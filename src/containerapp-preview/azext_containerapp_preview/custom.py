@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import errno
+from posixpath import split
 import yaml
 from knack.log import get_logger
 from knack.util import CLIError
@@ -37,6 +38,12 @@ def create_containerapps_from_compose(cmd,
     # pylint: disable=C0201,C0206
     for service_name in parsed_compose_file.services.keys():
         service = parsed_compose_file.services[service_name]
+        if service.ports is not None:
+            ingress_type = "external"
+            target_port = list(map(int, service.ports.split(":")))[1]
+        else:
+            ingress_type = None
+            target_port = None
         logger.info(  # pylint: disable=W1203
             f"Creating the Container Apps instance for {service_name} under {resource_group_name} in {location}.")
         containerapps_from_compose.append(
@@ -44,7 +51,9 @@ def create_containerapps_from_compose(cmd,
                                 service_name,
                                 resource_group_name,
                                 image=service.image,
-                                managed_env=managed_environment["id"]
+                                managed_env=managed_environment["id"],
+                                ingress=ingress_type,
+                                target_port=target_port
                                 ))
 
     return containerapps_from_compose
