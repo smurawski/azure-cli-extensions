@@ -27,6 +27,7 @@ def create_containerapps_from_compose(cmd,
 
     logger.info(   # pylint: disable=W1203
         f"Creating the Container Apps managed environment {managed_env} under {resource_group_name} in {location}.")
+
     managed_environment = create_managed_environment(cmd,
                                                      managed_env,
                                                      resource_group_name,
@@ -38,7 +39,16 @@ def create_containerapps_from_compose(cmd,
     # pylint: disable=C0201,C0206
     for service_name in parsed_compose_file.services.keys():
         service = parsed_compose_file.services[service_name]
+        # External Ingress Check
         if service.ports is not None:
+            ingress_type = "external"
+            target_port = list(map(int, service.ports.split(":")))[1]
+        # Internal Ingress Check
+        elif service.expose is not None:
+            ingress_type = "internal"
+            target_port = int(service.expose.strip("''[]''"))
+        # If both ports and expose are defined
+        elif service.ports and service.expose is not None:
             ingress_type = "external"
             target_port = list(map(int, service.ports.split(":")))[1]
         else:
