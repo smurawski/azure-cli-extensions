@@ -20,6 +20,7 @@ def create_containerapps_from_compose(cmd,
                                       resource_group_name,
                                       managed_env,
                                       compose_file_path='docker-compose.yml',
+                                      logs_workspace_name=None,
                                       location=None,
                                       tags=None):
     compose_yaml = load_yaml_file(compose_file_path)
@@ -31,6 +32,7 @@ def create_containerapps_from_compose(cmd,
     managed_environment = create_managed_environment(cmd,
                                                      managed_env,
                                                      resource_group_name,
+                                                     logs_workspace_name=logs_workspace_name,
                                                      tags=tags
                                                      )
 
@@ -46,7 +48,7 @@ def create_containerapps_from_compose(cmd,
         # Internal Ingress Check
         elif service.expose is not None:
             ingress_type = "internal"
-            target_port = int(service.expose.strip("''[]''"))
+            target_port = service.expose[0]
         else:
             ingress_type = None
             target_port = None

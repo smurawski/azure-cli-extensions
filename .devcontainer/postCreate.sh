@@ -5,13 +5,13 @@ git fetch upstream containerapp
 
 python -m venv env
 source env/bin/activate
-python -m pip install -U pip
-python -m pip install -U pylint
-python -m pip install -U flake8
-python -m pip install -U autopep8
+pip install -U pip
+pip install -U pylint
+pip install -U flake8
+pip install -U autopep8
 
-pip install azdev
-pip install -i https://test.pypi.org/simple/ pycomposefile==0.0.1a1
+pip install -U azdev
+pip install -U pycomposefile
 
 azdev setup --cli /src/azure-cli --repo .
 azdev extension build containerapp
