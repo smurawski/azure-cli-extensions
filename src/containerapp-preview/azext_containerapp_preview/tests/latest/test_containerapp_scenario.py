@@ -98,7 +98,7 @@ services:
             os.remove("docker-compose.yml")
 
 
-# @unittest.skip("Managed environment flaky")  # one test can only be run at one time, use this line to temporarily skip subsequent test
+@unittest.skip("Managed environment flaky")  # one test can only be run at one time, use this line to temporarily skip subsequent test
 class ContainerappComposePreviewIngressBothScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
     def test_containerapp_compose_create_with_both_ingress(self, resource_group):
