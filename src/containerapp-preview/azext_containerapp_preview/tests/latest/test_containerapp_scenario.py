@@ -12,7 +12,6 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-@unittest.skip("Managed environment flaky")  # one test can only be run at one time, use this line to temporarily skip subsequent test
 class ContainerappComposePreviewScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
@@ -27,10 +26,11 @@ services:
         docker_compose_file.close()
         
         self.kwargs.update({
-            'environment': self.create_random_name(prefix='containerapp-preview', length=24)
+            'environment': self.create_random_name(prefix='containerapp-preview', length=24),
+            'workspace': self.create_random_name(prefix='containerapp-preview', length=24),
         })
 
-        self.cmd('containerapp compose create --resource-group {rg} --environment {environment}', checks=[
+        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
             self.check('[].name', ['foo']),
             self.check('[] | length(@)', 1)
         ])
@@ -39,7 +39,6 @@ services:
             os.remove("docker-compose.yml")
 
 
-@unittest.skip("Managed environment flaky")  # one test can only be run at one time, use this line to temporarily skip subsequent test
 class ContainerappComposePreviewIngressScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
     def test_containerapp_compose_create_with_external_ingress(self, resource_group):
@@ -54,10 +53,11 @@ services:
         docker_compose_file.close()
 
         self.kwargs.update({
-            'environment': self.create_random_name(prefix='containerapp-preview', length=24)
+            'environment': self.create_random_name(prefix='containerapp-preview', length=24),
+            'workspace': self.create_random_name(prefix='containerapp-preview', length=24),
         })
 
-        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --compose-file-path docker-compose.yml', checks=[
+        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
             self.check('[].name', ['foo']),
             self.check('[] | length(@)', 1),
             self.check('[].properties.configuration.ingress.targetPort', [80]),
@@ -68,7 +68,6 @@ services:
             os.remove("docker-compose.yml")
 
 
-@unittest.skip("Managed environment flaky")  # one test can only be run at one time, use this line to temporarily skip subsequent test
 class ContainerappComposePreviewIngressInternalScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
     def test_containerapp_compose_create_with_internal_ingress(self, resource_group):
@@ -84,10 +83,11 @@ services:
         docker_compose_file.close()
 
         self.kwargs.update({
-            'environment': self.create_random_name(prefix='containerapp-preview', length=24)
+            'environment': self.create_random_name(prefix='containerapp-preview', length=24),
+            'workspace': self.create_random_name(prefix='containerapp-preview', length=24),
         })
 
-        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --compose-file-path docker-compose.yml', checks=[
+        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
             self.check('[].name', ['foo']),
             self.check('[] | length(@)', 1),
             self.check('[].properties.configuration.ingress.targetPort', [3000]),
@@ -98,7 +98,6 @@ services:
             os.remove("docker-compose.yml")
 
 
-@unittest.skip("Managed environment flaky")  # one test can only be run at one time, use this line to temporarily skip subsequent test
 class ContainerappComposePreviewIngressBothScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
     def test_containerapp_compose_create_with_both_ingress(self, resource_group):
@@ -115,10 +114,12 @@ services:
         docker_compose_file.close()
 
         self.kwargs.update({
-            'environment': self.create_random_name(prefix='containerapp-preview', length=24)
+            'environment': self.create_random_name(prefix='containerapp-preview', length=24),
+            'workspace': self.create_random_name(prefix='containerapp-preview', length=24),
+
         })
 
-        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --compose-file-path docker-compose.yml', checks=[
+        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
             self.check('[].name', ['foo']),
             self.check('[] | length(@)', 1),
             self.check('[].properties.configuration.ingress.targetPort', [3000]),

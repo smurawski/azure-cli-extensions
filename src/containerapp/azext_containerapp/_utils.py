@@ -232,7 +232,7 @@ def _generate_log_analytics_workspace_name(resource_group_name):
     return name
 
 
-def _generate_log_analytics_if_not_provided(cmd, logs_customer_id, logs_key, location, resource_group_name):
+def _generate_log_analytics_if_not_provided(cmd, logs_customer_id, logs_key, logs_workspace_name, location, resource_group_name):
     if logs_customer_id is None and logs_key is None:
         logger.warning("No Log Analytics workspace provided.")
         try:
@@ -249,7 +249,11 @@ def _generate_log_analytics_if_not_provided(cmd, logs_customer_id, logs_key, loc
             from azure.cli.core.commands import LongRunningOperation
             from azure.mgmt.loganalytics.models import Workspace
 
-            workspace_name = _generate_log_analytics_workspace_name(resource_group_name)
+            if logs_workspace_name is None:
+                workspace_name = _generate_log_analytics_workspace_name(resource_group_name)
+            else:
+                workspace_name = logs_workspace_name
+
             workspace_instance = Workspace(location=log_analytics_location)
             logger.warning("Generating a Log Analytics workspace with name \"{}\"".format(workspace_name))  # pylint: disable=logging-format-interpolation
 
