@@ -732,6 +732,7 @@ def create_managed_environment(cmd,
                                resource_group_name,
                                logs_customer_id=None,
                                logs_key=None,
+                               logs_workspace_name=None,
                                location=None,
                                instrumentation_key=None,
                                infrastructure_subnet_resource_id=None,
@@ -748,7 +749,7 @@ def create_managed_environment(cmd,
     _ensure_location_allowed(cmd, location, "Microsoft.App", "managedEnvironments")
 
     if logs_customer_id is None or logs_key is None:
-        logs_customer_id, logs_key = _generate_log_analytics_if_not_provided(cmd, logs_customer_id, logs_key, location, resource_group_name)
+        logs_customer_id, logs_key = _generate_log_analytics_if_not_provided(cmd, logs_customer_id, logs_key, logs_workspace_name, location, resource_group_name)
 
     log_analytics_config_def = LogAnalyticsConfigurationModel
     log_analytics_config_def["customerId"] = logs_customer_id
