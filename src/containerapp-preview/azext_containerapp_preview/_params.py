@@ -17,3 +17,4 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp compose create') as c:
         c.argument('compose_file_path', options_list=['--compose-file-path', '-f'], help='Path to a Docker Compose file with the configuration to import to Azure Containerapps.')
+        c.argument('logs_workspace_name', options_list=['--logs-workspace', '-w'], help='Log analytics workspace name.')
