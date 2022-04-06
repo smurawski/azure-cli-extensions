@@ -32,7 +32,7 @@ services:
 
         self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
             self.check('[].name', ['foo']),
-            self.check('[] | length(@)', 1)
+            self.check('[] | length(@)', 1),
         ])
 
         if os.path.exists("docker-compose.yml"):
@@ -58,10 +58,8 @@ services:
         })
 
         self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
-            self.check('[].name', ['foo']),
-            self.check('[] | length(@)', 1),
-            self.check('[].properties.configuration.ingress.targetPort', [80]),
-            self.check('[].properties.configuration.ingress.external', [True])
+            self.check('[?name==`foo`].properties.configuration.ingress.targetPort', [80]),
+            self.check('[?name==`foo`].properties.configuration.ingress.external', [True]),
         ])
 
         if os.path.exists("docker-compose.yml"):
@@ -88,10 +86,8 @@ services:
         })
 
         self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
-            self.check('[].name', ['foo']),
-            self.check('[] | length(@)', 1),
-            self.check('[].properties.configuration.ingress.targetPort', [3000]),
-            self.check('[].properties.configuration.ingress.external', [False])
+            self.check('[?name==`foo`].properties.configuration.ingress.targetPort', [3000]),
+            self.check('[?name==`foo`].properties.configuration.ingress.external', [False]),
         ])
 
         if os.path.exists("docker-compose.yml"):
@@ -120,10 +116,8 @@ services:
         })
 
         self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
-            self.check('[].name', ['foo']),
-            self.check('[] | length(@)', 1),
-            self.check('[].properties.configuration.ingress.targetPort', [3000]),
-            self.check('[].properties.configuration.ingress.external', [True])
+            self.check('[?name==`foo`].properties.configuration.ingress.targetPort', [3000]),
+            self.check('[?name==`foo`].properties.configuration.ingress.external', [True]),
         ])
 
         if os.path.exists("docker-compose.yml"):
