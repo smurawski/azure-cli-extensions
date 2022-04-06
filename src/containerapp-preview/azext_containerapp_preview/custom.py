@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import errno
-from posixpath import split
 import yaml
 from knack.log import get_logger
 from knack.util import CLIError
