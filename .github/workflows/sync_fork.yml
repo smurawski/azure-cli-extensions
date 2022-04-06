@@ -1,0 +1,21 @@
+# .github/workflows/sync.yml
+name: Rebase Upstream
+
+
+on:
+  schedule:
+  - cron: "0 0 * * *"  # run once a day
+  workflow_dispach:    # run manually
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@containerapp-preview
+      with:
+        fetch-depth: 50  # greater than the number of commits you made
+
+    - uses: imba-tjd/rebase-upstream-action@master
+      with: 
+        upstream: Azure/azure-cli-extensions
+        branch:   main
