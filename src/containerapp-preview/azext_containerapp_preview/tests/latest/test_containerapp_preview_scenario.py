@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from encodings import utf_8
 import os
 import unittest
 
@@ -21,22 +22,29 @@ services:
   foo:
     image: smurawski/printenv:latest
 """
-        docker_compose_file = open("docker-compose.yml", "w")
+        compose_file_name = f"{self._testMethodName}_compose.yml"
+        docker_compose_file = open(compose_file_name, "w")
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
-        
+
         self.kwargs.update({
             'environment': self.create_random_name(prefix='containerapp-preview', length=24),
             'workspace': self.create_random_name(prefix='containerapp-preview', length=24),
+            'compose': compose_file_name,
         })
 
-        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
+        command_string = 'containerapp compose create'
+        command_string += ' --compose-file-path {compose}'
+        command_string += ' --resource-group {rg}'
+        command_string += ' --environment {environment}'
+        command_string += ' --logs-workspace {workspace}'
+        self.cmd(command_string, checks=[
             self.check('[].name', ['foo']),
             self.check('[] | length(@)', 1),
         ])
 
-        if os.path.exists("docker-compose.yml"):
-            os.remove("docker-compose.yml")
+        if os.path.exists(compose_file_name):
+            os.remove(compose_file_name)
 
 
 class ContainerappComposePreviewIngressScenarioTest(ScenarioTest):
@@ -48,22 +56,29 @@ services:
     image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
     ports: 8080:80
 """
-        docker_compose_file = open("docker-compose.yml", "w")
+        compose_file_name = f"{self._testMethodName}_compose.yml"
+        docker_compose_file = open(compose_file_name, "w")
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
 
         self.kwargs.update({
             'environment': self.create_random_name(prefix='containerapp-preview', length=24),
             'workspace': self.create_random_name(prefix='containerapp-preview', length=24),
+            'compose': compose_file_name,
         })
 
-        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
+        command_string = 'containerapp compose create'
+        command_string += ' --compose-file-path {compose}'
+        command_string += ' --resource-group {rg}'
+        command_string += ' --environment {environment}'
+        command_string += ' --logs-workspace {workspace}'
+        self.cmd(command_string, checks=[
             self.check('[?name==`foo`].properties.configuration.ingress.targetPort', [80]),
             self.check('[?name==`foo`].properties.configuration.ingress.external', [True]),
         ])
 
-        if os.path.exists("docker-compose.yml"):
-            os.remove("docker-compose.yml")
+        if os.path.exists(compose_file_name):
+            os.remove(compose_file_name)
 
 
 class ContainerappComposePreviewIngressInternalScenarioTest(ScenarioTest):
@@ -76,22 +91,29 @@ services:
     expose:
       - "3000"
 """
-        docker_compose_file = open("docker-compose.yml", "w")
+        compose_file_name = f"{self._testMethodName}_compose.yml"
+        docker_compose_file = open(compose_file_name, "w")
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
 
         self.kwargs.update({
             'environment': self.create_random_name(prefix='containerapp-preview', length=24),
             'workspace': self.create_random_name(prefix='containerapp-preview', length=24),
+            'compose': compose_file_name,
         })
 
-        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
+        command_string = 'containerapp compose create'
+        command_string += ' --compose-file-path {compose}'
+        command_string += ' --resource-group {rg}'
+        command_string += ' --environment {environment}'
+        command_string += ' --logs-workspace {workspace}'
+        self.cmd(command_string, checks=[
             self.check('[?name==`foo`].properties.configuration.ingress.targetPort', [3000]),
             self.check('[?name==`foo`].properties.configuration.ingress.external', [False]),
         ])
 
-        if os.path.exists("docker-compose.yml"):
-            os.remove("docker-compose.yml")
+        if os.path.exists(compose_file_name):
+            os.remove(compose_file_name)
 
 
 class ContainerappComposePreviewIngressBothScenarioTest(ScenarioTest):
@@ -105,20 +127,26 @@ services:
     expose:
       - "5000"
 """
-        docker_compose_file = open("docker-compose.yml", "w")
+        compose_file_name = f"{self._testMethodName}_compose.yml"
+        docker_compose_file = open(compose_file_name, "w")
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
 
         self.kwargs.update({
             'environment': self.create_random_name(prefix='containerapp-preview', length=24),
             'workspace': self.create_random_name(prefix='containerapp-preview', length=24),
-
+            'compose': compose_file_name,
         })
 
-        self.cmd('containerapp compose create --resource-group {rg} --environment {environment} --logs-workspace {workspace}', checks=[
+        command_string = 'containerapp compose create'
+        command_string += ' --compose-file-path {compose}'
+        command_string += ' --resource-group {rg}'
+        command_string += ' --environment {environment}'
+        command_string += ' --logs-workspace {workspace}'
+        self.cmd(command_string, checks=[
             self.check('[?name==`foo`].properties.configuration.ingress.targetPort', [3000]),
             self.check('[?name==`foo`].properties.configuration.ingress.external', [True]),
         ])
 
-        if os.path.exists("docker-compose.yml"):
-            os.remove("docker-compose.yml")
+        if os.path.exists(compose_file_name):
+            os.remove(compose_file_name)
