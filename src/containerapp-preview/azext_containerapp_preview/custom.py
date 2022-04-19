@@ -43,7 +43,7 @@ def create_containerapps_from_compose(cmd,
         # External Ingress Check
         if service.ports is not None:
             ingress_type = "external"
-            target_port = list(map(int, service.ports.split(":")))[1]
+            target_port = int(service.ports[0].split(":")[1])
         # Internal Ingress Check
         elif service.expose is not None:
             ingress_type = "internal"
