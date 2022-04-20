@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from encodings import utf_8
 import os
 import unittest
 
@@ -23,7 +22,7 @@ services:
     image: smurawski/printenv:latest
 """
         compose_file_name = f"{self._testMethodName}_compose.yml"
-        docker_compose_file = open(compose_file_name, "w", encoding=utf_8)
+        docker_compose_file = open(compose_file_name, "w", encoding='utf-8')
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
 
@@ -57,7 +56,7 @@ services:
     ports: 8080:80
 """
         compose_file_name = f"{self._testMethodName}_compose.yml"
-        docker_compose_file = open(compose_file_name, "w", encoding=utf_8)
+        docker_compose_file = open(compose_file_name, "w", encoding='utf-8')
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
 
@@ -92,7 +91,7 @@ services:
       - "3000"
 """
         compose_file_name = f"{self._testMethodName}_compose.yml"
-        docker_compose_file = open(compose_file_name, "w", encoding=utf_8)
+        docker_compose_file = open(compose_file_name, "w", encoding='utf-8')
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
 
@@ -128,7 +127,7 @@ services:
       - "5000"
 """
         compose_file_name = f"{self._testMethodName}_compose.yml"
-        docker_compose_file = open(compose_file_name, "w", encoding=utf_8)
+        docker_compose_file = open(compose_file_name, "w", encoding='utf-8')
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
 
@@ -164,7 +163,7 @@ services:
       - "5000"
 """
         compose_file_name = f"{self._testMethodName}_compose.yml"
-        docker_compose_file = open(compose_file_name, "w", encoding=utf_8)
+        docker_compose_file = open(compose_file_name, "w", encoding='utf-8')
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
 
@@ -192,14 +191,12 @@ services:
 services:
   foo:
     image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
-    command:
-      - echo
-      - "hello world"
+    command: ["echo", "hello world"]
     expose:
       - "5000"
 """
         compose_file_name = f"{self._testMethodName}_compose.yml"
-        docker_compose_file = open(compose_file_name, "w", encoding=utf_8)
+        docker_compose_file = open(compose_file_name, "w", encoding='utf-8')
         _ = docker_compose_file.write(compose_text)
         docker_compose_file.close()
 
