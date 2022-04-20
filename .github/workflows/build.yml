@@ -72,7 +72,7 @@ jobs:
         if: success() || failure()
         run: |
           source env/bin/activate
-          azdev test containerapp-preview
+          azdev test containerapp-preview --series
 
       - name: Run package creation
         run: |
