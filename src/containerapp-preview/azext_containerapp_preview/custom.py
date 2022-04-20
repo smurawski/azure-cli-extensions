@@ -40,19 +40,9 @@ def create_containerapps_from_compose(cmd,
     # pylint: disable=C0201,C0206
     for service_name in parsed_compose_file.services.keys():
         service = parsed_compose_file.services[service_name]
-        # External Ingress Check
-        if service.ports is not None:
-            ingress_type = "external"
-            target_port = int(service.ports[0].split(":")[1])
-        # Internal Ingress Check
-        elif service.expose is not None:
-            ingress_type = "internal"
-            target_port = service.expose[0]
-        else:
-            ingress_type = None
-            target_port = None
         logger.info(  # pylint: disable=W1203
             f"Creating the Container Apps instance for {service_name} under {resource_group_name} in {location}.")
+        ingress_type, target_port = resolve_ingress_and_target_port(service)
         containerapps_from_compose.append(
             create_containerapp(cmd,
                                 service_name,
@@ -60,10 +50,35 @@ def create_containerapps_from_compose(cmd,
                                 image=service.image,
                                 managed_env=managed_environment["id"],
                                 ingress=ingress_type,
-                                target_port=target_port
+                                target_port=target_port,
+                                startup_command=resolve_service_startup_command(service.command)
                                 ))
 
     return containerapps_from_compose
+
+
+def resolve_ingress_and_target_port(service):
+    # External Ingress Check
+    if service.ports is not None:
+        ingress_type = "external"
+        target_port = int(service.ports[0].split(":")[1])
+    # Internal Ingress Check
+    elif service.expose is not None:
+        ingress_type = "internal"
+        target_port = service.expose[0]
+    else:
+        ingress_type = None
+        target_port = None
+    return (ingress_type, target_port)
+
+
+def resolve_service_startup_command(command):
+    startup_command = []
+    if command is not None:
+        startup_command.append(command.command_string())
+    else:
+        startup_command = None
+    return startup_command
 
 
 def load_yaml_file(file_name):
