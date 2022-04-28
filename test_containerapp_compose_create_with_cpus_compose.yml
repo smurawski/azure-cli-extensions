@@ -1,0 +1,7 @@
+
+services:
+  foo:
+    image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
+    cpus: 1.25
+    expose:
+      - "3000"
