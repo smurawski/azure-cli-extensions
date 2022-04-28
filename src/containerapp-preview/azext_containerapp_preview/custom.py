@@ -38,30 +38,65 @@ def create_containerapps_from_compose(cmd,
     containerapps_from_compose = []
     # Using the key to iterate to get the service name
     # pylint: disable=C0201,C0206
-    for service_name in parsed_compose_file.services.keys():
+    for service_name in parsed_compose_file.ordered_services.keys():
         service = parsed_compose_file.services[service_name]
         logger.info(  # pylint: disable=W1203
             f"Creating the Container Apps instance for {service_name} under {resource_group_name} in {location}.")
         ingress_type, target_port = resolve_ingress_and_target_port(service)
+        startup_command, startup_args = resolve_service_startup_command(service)
+        cpu = resolve_cpu_configuration_from_service(service)
         containerapps_from_compose.append(
             create_containerapp(cmd,
                                 service_name,
                                 resource_group_name,
                                 image=service.image,
+                                container_name=service.container_name,
                                 managed_env=managed_environment["id"],
                                 ingress=ingress_type,
                                 target_port=target_port,
-                                startup_command=resolve_service_startup_command(service.command)
+                                startup_command=startup_command,
+                                args=startup_args,
+                                cpu=cpu,
                                 ))
 
     return containerapps_from_compose
+
+
+def service_deploy_exists(service):
+    return service.deploy is not None
+
+
+def service_deploy_resources_exists(service):
+    return service_deploy_exists(service) and service.deploy.resources is not None
+
+
+def validate_cpu_setting(cpu):
+    valid_vCPUs = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
+    if cpu in valid_vCPUs:
+        return str(cpu)
+    else:
+        if cpu is not None:
+            logger.warn(  # pylint: disable=W1203
+                f"Invalid CPU reservation request of {cpu}. The default value will be used.")
+        return None
+
+
+def resolve_cpu_configuration_from_service(service):
+    cpu = None
+    if service_deploy_resources_exists(service):
+        resources = service.deploy.resources
+        if resources.reservations is not None and resources.reservations.cpu is not None:
+            cpu = resources.reservations.cpus
+    elif service.cpus is not None:
+        cpu = service.cpus
+    return validate_cpu_setting(cpu)
 
 
 def resolve_ingress_and_target_port(service):
     # External Ingress Check
     if service.ports is not None:
         ingress_type = "external"
-        target_port = int(service.ports[0].split(":")[1])
+        target_port = int(service.ports[0].target)
     # Internal Ingress Check
     elif service.expose is not None:
         ingress_type = "internal"
@@ -72,13 +107,23 @@ def resolve_ingress_and_target_port(service):
     return (ingress_type, target_port)
 
 
-def resolve_service_startup_command(command):
-    startup_command = []
-    if command is not None:
-        startup_command.append(command.command_string())
+def resolve_service_startup_command(service):
+    startup_command_array = []
+    startup_args_array = []
+    if service.entrypoint is not None:
+        startup_command = service.entrypoint.command_string()
+        startup_command_array.append(startup_command)
+        if service.command is not None:
+            startup_args = service.command.command_string()
+            startup_args_array.append(startup_args)
+    elif service.command is not None:
+        startup_args = service.command.command_string()
+        startup_command_array.append(startup_args)
+        startup_args_array = None
     else:
-        startup_command = None
-    return startup_command
+        startup_command_array = None
+        startup_args_array = None
+    return (startup_command_array, startup_args_array)
 
 
 def load_yaml_file(file_name):
