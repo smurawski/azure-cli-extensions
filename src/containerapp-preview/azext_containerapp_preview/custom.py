@@ -44,7 +44,10 @@ def create_containerapps_from_compose(cmd,
             f"Creating the Container Apps instance for {service_name} under {resource_group_name} in {location}.")
         ingress_type, target_port = resolve_ingress_and_target_port(service)
         startup_command, startup_args = resolve_service_startup_command(service)
-        cpu = resolve_cpu_configuration_from_service(service)
+        cpu, memory = validate_memory_and_cpu_setting(
+            resolve_cpu_configuration_from_service(service),
+            resolve_memory_configuration_from_service(service)
+        )
         containerapps_from_compose.append(
             create_containerapp(cmd,
                                 service_name,
@@ -57,6 +60,7 @@ def create_containerapps_from_compose(cmd,
                                 startup_command=startup_command,
                                 args=startup_args,
                                 cpu=cpu,
+                                memory=memory,
                                 ))
 
     return containerapps_from_compose
@@ -70,15 +74,35 @@ def service_deploy_resources_exists(service):
     return service_deploy_exists(service) and service.deploy.resources is not None
 
 
-def validate_cpu_setting(cpu):
-    valid_vCPUs = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
-    if cpu in valid_vCPUs:
-        return str(cpu)
-    else:
-        if cpu is not None:
-            logger.warn(  # pylint: disable=W1203
-                f"Invalid CPU reservation request of {cpu}. The default value will be used.")
-        return None
+def valid_resource_settings():
+    # vCPU and Memory reservations
+    # https://docs.microsoft.com/azure/container-apps/containers#configuration
+    return {
+        "0.25": "0.5",
+        "0.5": "1.0",
+        "0.75": "1.5",
+        "1.0": "2.0",
+        "1.25": "2.5",
+        "1.5": "3.0",
+        "1.75": "3.5",
+        "2.0": "4.0",
+    }
+
+
+def validate_memory_and_cpu_setting(cpu, memory):
+    settings = valid_resource_settings()
+
+    if cpu in settings.keys():
+        if memory != settings[cpu]:
+            logger.warning(  # pylint: disable=W1203
+                f"Invalid memory reservation request of {memory}. The default value of {settings[cpu]}Gi will be used.")
+            memory = settings[cpu]
+        return (cpu, f"{memory}Gi")
+
+    if cpu is not None:
+        logger.warning(  # pylint: disable=W1203
+            f"Invalid CPU reservation request of {cpu}. The default resource values will be used.")
+    return (None, None)
 
 
 def resolve_cpu_configuration_from_service(service):
@@ -89,7 +113,18 @@ def resolve_cpu_configuration_from_service(service):
             cpu = resources.reservations.cpus
     elif service.cpus is not None:
         cpu = service.cpus
-    return validate_cpu_setting(cpu)
+    return str(cpu)
+
+
+def resolve_memory_configuration_from_service(service):
+    memory = None
+    if service_deploy_resources_exists(service):
+        resources = service.deploy.resources
+        if resources.reservations is not None and resources.reservations.memory is not None:
+            memory = resources.reservations.memory.gigabytes()
+    elif service.mem_reservation is not None:
+        memory = service.mem_reservation.gigabytes()
+    return str(memory)
 
 
 def resolve_ingress_and_target_port(service):
