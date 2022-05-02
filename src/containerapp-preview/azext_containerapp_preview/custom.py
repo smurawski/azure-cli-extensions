@@ -109,7 +109,7 @@ def resolve_cpu_configuration_from_service(service):
     cpu = None
     if service_deploy_resources_exists(service):
         resources = service.deploy.resources
-        if resources.reservations is not None and resources.reservations.cpu is not None:
+        if resources.reservations is not None and resources.reservations.cpus is not None:
             cpu = resources.reservations.cpus
     elif service.cpus is not None:
         cpu = service.cpus

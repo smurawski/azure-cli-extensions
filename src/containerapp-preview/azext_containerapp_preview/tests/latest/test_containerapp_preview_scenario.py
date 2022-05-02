@@ -295,8 +295,9 @@ services:
   foo:
     image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
     deploy:
-      reservations:
-        cpu: 1.25
+      resources:
+        reservations:
+          cpus: 1.25
     expose:
       - "3000"
 """
@@ -331,8 +332,9 @@ services:
     image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
     cpus: 0.75
     deploy:
-      reservations:
-        cpu: 1.25
+      resources:
+        reservations:
+          cpus: 1.25
     expose:
       - "3000"
 """
