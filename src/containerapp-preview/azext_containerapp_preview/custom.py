@@ -92,7 +92,7 @@ def valid_resource_settings():
 def validate_memory_and_cpu_setting(cpu, memory):
     settings = valid_resource_settings()
 
-    if cpu in settings.keys():
+    if cpu in settings.keys():  # pylint: disable=C0201
         if memory != settings[cpu]:
             logger.warning(  # pylint: disable=W1203
                 f"Invalid memory reservation request of {memory}. The default value of {settings[cpu]}Gi will be used.")
