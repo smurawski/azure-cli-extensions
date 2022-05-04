@@ -16,5 +16,3 @@ pip install -U pycomposefile
 azdev setup --cli /src/azure-cli --repo .
 azdev extension build containerapp
 azdev extension build containerapp-preview
-
-az provider register -n Microsoft.App --wait
