@@ -48,6 +48,8 @@ def create_containerapps_from_compose(cmd,
             resolve_cpu_configuration_from_service(service),
             resolve_memory_configuration_from_service(service)
         )
+        environment = resolve_environment_from_service(service)
+
         containerapps_from_compose.append(
             create_containerapp(cmd,
                                 service_name,
@@ -61,6 +63,7 @@ def create_containerapps_from_compose(cmd,
                                 args=startup_args,
                                 cpu=cpu,
                                 memory=memory,
+                                env_vars=environment,
                                 ))
 
     return containerapps_from_compose
@@ -72,6 +75,20 @@ def service_deploy_exists(service):
 
 def service_deploy_resources_exists(service):
     return service_deploy_exists(service) and service.deploy.resources is not None
+
+
+def resolve_environment_from_service(service):
+    env_array = []
+
+    env_vars = service.resolve_environment_hierarchy()
+
+    if env_vars is None:
+        return None
+
+    for k, v in env_vars.items():
+        env_array.append(f"{k}={v}")
+
+    return env_array
 
 
 def valid_resource_settings():
