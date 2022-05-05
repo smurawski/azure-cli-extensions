@@ -36,6 +36,9 @@ def create_containerapps_from_compose(cmd,
     compose_yaml = load_yaml_file(compose_file_path)
     parsed_compose_file = ComposeFile(compose_yaml)
 
+    compose_yaml = load_yaml_file(compose_file_path)
+    parsed_compose_file = ComposeFile(compose_yaml)
+
     containerapps_from_compose = []
     # Using the key to iterate to get the service name
     # pylint: disable=C0201,C0206
