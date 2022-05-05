@@ -19,6 +19,7 @@ def create_containerapps_from_compose(cmd,
                                       resource_group_name,
                                       managed_env,
                                       compose_file_path='docker-compose.yml',
+                                      transport=None,
                                       logs_workspace_name=None,
                                       location=None,
                                       tags=None):
@@ -43,6 +44,7 @@ def create_containerapps_from_compose(cmd,
         logger.info(  # pylint: disable=W1203
             f"Creating the Container Apps instance for {service_name} under {resource_group_name} in {location}.")
         ingress_type, target_port = resolve_ingress_and_target_port(service)
+        transport_setting = resolve_transport_from_cli_args(service_name, transport)
         startup_command, startup_args = resolve_service_startup_command(service)
         cpu, memory = validate_memory_and_cpu_setting(
             resolve_cpu_configuration_from_service(service),
@@ -59,6 +61,7 @@ def create_containerapps_from_compose(cmd,
                                 managed_env=managed_environment["id"],
                                 ingress=ingress_type,
                                 target_port=target_port,
+                                transport=transport_setting,
                                 startup_command=startup_command,
                                 args=startup_args,
                                 cpu=cpu,
@@ -75,6 +78,23 @@ def service_deploy_exists(service):
 
 def service_deploy_resources_exists(service):
     return service_deploy_exists(service) and service.deploy.resources is not None
+
+
+def flatten_list(source_value):
+    flat_list = list()
+    for sub_list in source_value:
+        flat_list += sub_list
+    return flat_list
+
+
+def resolve_transport_from_cli_args(service_name, transport):
+    if transport is not None:
+        transport = flatten_list(transport)
+        for setting in transport:
+            key, value = setting.split('=')
+            if key.lower() == service_name.lower():
+                return value
+    return 'auto'
 
 
 def resolve_environment_from_service(service):
@@ -111,8 +131,9 @@ def validate_memory_and_cpu_setting(cpu, memory):
 
     if cpu in settings.keys():  # pylint: disable=C0201
         if memory != settings[cpu]:
-            logger.warning(  # pylint: disable=W1203
-                f"Invalid memory reservation request of {memory}. The default value of {settings[cpu]}Gi will be used.")
+            if memory is not None:
+                logger.warning(  # pylint: disable=W1203
+                    f"Unsupported memory reservation request of {memory}. The default value of {settings[cpu]}Gi will be used.")
             memory = settings[cpu]
         return (cpu, f"{memory}Gi")
 
@@ -127,10 +148,10 @@ def resolve_cpu_configuration_from_service(service):
     if service_deploy_resources_exists(service):
         resources = service.deploy.resources
         if resources.reservations is not None and resources.reservations.cpus is not None:
-            cpu = resources.reservations.cpus
+            cpu = str(resources.reservations.cpus)
     elif service.cpus is not None:
-        cpu = service.cpus
-    return str(cpu)
+        cpu = str(service.cpus)
+    return cpu
 
 
 def resolve_memory_configuration_from_service(service):
@@ -138,10 +159,10 @@ def resolve_memory_configuration_from_service(service):
     if service_deploy_resources_exists(service):
         resources = service.deploy.resources
         if resources.reservations is not None and resources.reservations.memory is not None:
-            memory = resources.reservations.memory.gigabytes()
+            memory = str(resources.reservations.memory.gigabytes())
     elif service.mem_reservation is not None:
-        memory = service.mem_reservation.gigabytes()
-    return str(memory)
+        memory = str(service.mem_reservation.gigabytes())
+    return memory
 
 
 def resolve_ingress_and_target_port(service):
