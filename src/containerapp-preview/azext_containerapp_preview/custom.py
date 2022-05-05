@@ -81,7 +81,7 @@ def service_deploy_resources_exists(service):
 
 
 def flatten_list(source_value):
-    flat_list = list()
+    flat_list = []
     for sub_list in source_value:
         flat_list += sub_list
     return flat_list
@@ -132,8 +132,9 @@ def validate_memory_and_cpu_setting(cpu, memory):
     if cpu in settings.keys():  # pylint: disable=C0201
         if memory != settings[cpu]:
             if memory is not None:
-                logger.warning(  # pylint: disable=W1203
-                    f"Unsupported memory reservation request of {memory}. The default value of {settings[cpu]}Gi will be used.")
+                warning = f"Unsupported memory reservation request of {memory}."
+                warning += f"The default value of {settings[cpu]}Gi will be used."
+                logger.warning(warning)
             memory = settings[cpu]
         return (cpu, f"{memory}Gi")
 
