@@ -5,11 +5,11 @@
 
 import errno
 import yaml
+
 from knack.log import get_logger
 from knack.util import CLIError
-from pycomposefile import ComposeFile
-# pylint: disable=E0401
-from azext_containerapp.custom import (
+from .vendored_sdks.pycomposefile import ComposeFile
+from .vendored_sdks.azext_containerapp.custom import (
     create_containerapp, create_managed_environment)
 
 logger = get_logger(__name__)
@@ -23,9 +23,6 @@ def create_containerapps_from_compose(cmd,
                                       logs_workspace_name=None,
                                       location=None,
                                       tags=None):
-    compose_yaml = load_yaml_file(compose_file_path)
-    parsed_compose_file = ComposeFile(compose_yaml)
-
     logger.info(   # pylint: disable=W1203
         f"Creating the Container Apps managed environment {managed_env} under {resource_group_name} in {location}.")
 
@@ -35,6 +32,9 @@ def create_containerapps_from_compose(cmd,
                                                      logs_workspace_name=logs_workspace_name,
                                                      tags=tags
                                                      )
+
+    compose_yaml = load_yaml_file(compose_file_path)
+    parsed_compose_file = ComposeFile(compose_yaml)
 
     containerapps_from_compose = []
     # Using the key to iterate to get the service name
