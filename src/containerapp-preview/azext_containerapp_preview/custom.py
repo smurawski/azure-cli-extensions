@@ -115,12 +115,11 @@ def resolve_transport_from_cli_args(service_name, transport):
 
 def resolve_registry_from_cli_args(registry_server, registry_user, registry_pass):
     if registry_server is not None:
-        if registry_user is None:
+        if registry_user is None and registry_pass is None:
             registry_user = prompt("Please enter the registry's username: ")
-            return registry_user
-        if registry_pass is None:
             registry_pass = prompt("Please enter the registry's password: ")
-            return registry_pass
+        elif registry_user is not None and registry_pass is None:
+            registry_pass = prompt("Please enter the registry's password: ")
     return (registry_server, registry_user, registry_pass)
 
 
