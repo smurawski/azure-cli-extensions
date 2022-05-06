@@ -5,6 +5,8 @@
 
 from azure.cli.core import AzCommandsLoader
 
+from azext_containerapp_preview._help import helps  # pylint: disable=unused-import
+
 
 class ContainerappPreviewCommandsLoader(AzCommandsLoader):
 
