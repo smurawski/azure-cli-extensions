@@ -30,7 +30,7 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
                                       transport=None,
                                       logs_workspace_name=None,
                                       location=None,
-                                      tags=None):  
+                                      tags=None):
     logger.info(   # pylint: disable=W1203
         f"Creating the Container Apps managed environment {managed_env} under {resource_group_name} in {location}.")
 
