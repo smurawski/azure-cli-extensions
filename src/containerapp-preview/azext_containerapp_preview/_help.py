@@ -6,13 +6,17 @@
 
 from knack.help_files import helps  # pylint: disable=unused-import
 
+helps['containerapp'] = """
+    type: group
+    short-summary: Manage Azure Container Apps.
+"""
 
-helps['containerapps compose'] = """
+helps['containerapp compose'] = """
     type: group
     short-summary: Commands to manage Containerappss.
 """
 
-helps['containerapps compose create'] = """
+helps['containerapp compose create'] = """
     type: command
     short-summary: Create a Containerapps.
 """
