@@ -7,7 +7,6 @@ import os
 import platform
 from unittest import mock
 import time
-import unittest
 from azext_containerapp.custom import containerapp_ssh
 
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
@@ -350,8 +349,8 @@ class ContainerappScenarioTest(ScenarioTest):
 
         cmd = mock.MagicMock()
         cmd.cli_ctx = get_dummy_cli()
-        from azext_containerapp._validators import validate_ssh
-        from azext_containerapp.custom import containerapp_ssh
+        from ._validators import validate_ssh
+        from .custom import containerapp_ssh
 
         class Namespace: pass
         namespace = Namespace()

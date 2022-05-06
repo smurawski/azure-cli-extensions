@@ -8,9 +8,14 @@ import yaml
 
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.prompting import prompt
+from knack.prompting import prompt_choice_list
 from pycomposefile import ComposeFile
+
 from .vendored_sdks.azext_containerapp.custom import (
     create_containerapp, create_managed_environment)
+from .vendored_sdks.azext_containerapp._clients import ManagedEnvironmentClient
+
 
 logger = get_logger(__name__)
 
@@ -18,7 +23,7 @@ logger = get_logger(__name__)
 def create_containerapps_from_compose(cmd,
                                       resource_group_name,
                                       managed_env,
-                                      compose_file_path='docker-compose.yml',
+                                      compose_file_path='./docker-compose.yml',
                                       transport=None,
                                       logs_workspace_name=None,
                                       location=None,
@@ -26,12 +31,16 @@ def create_containerapps_from_compose(cmd,
     logger.info(   # pylint: disable=W1203
         f"Creating the Container Apps managed environment {managed_env} under {resource_group_name} in {location}.")
 
-    managed_environment = create_managed_environment(cmd,
-                                                     managed_env,
-                                                     resource_group_name,
-                                                     logs_workspace_name=logs_workspace_name,
-                                                     tags=tags
-                                                     )
+    try:
+        managed_environment = ManagedEnvironmentClient.show(cmd=cmd,
+                                                            resource_group_name=resource_group_name,
+                                                            name=managed_env)
+    except:  # pylint: disable=W0702
+        managed_environment = create_managed_environment(cmd,
+                                                         managed_env,
+                                                         resource_group_name,
+                                                         logs_workspace_name=logs_workspace_name,
+                                                         tags=tags)
 
     compose_yaml = load_yaml_file(compose_file_path)
     parsed_compose_file = ComposeFile(compose_yaml)
@@ -106,6 +115,8 @@ def resolve_environment_from_service(service):
         return None
 
     for k, v in env_vars.items():
+        if v is None:
+            v = prompt(f"{k} is empty. What would you like the value to be? ")
         env_array.append(f"{k}={v}")
 
     return env_array
@@ -166,15 +177,37 @@ def resolve_memory_configuration_from_service(service):
     return memory
 
 
+def resolve_port_or_expose_list(ports, name):
+    if len(ports) > 1:
+        message = f"You have more than one {name} mapping defined in your docker-compose file."
+        message += " Which port would you like to use? "
+        choice_index = prompt_choice_list(message, ports)
+
+    return ports[choice_index]
+
+
 def resolve_ingress_and_target_port(service):
     # External Ingress Check
     if service.ports is not None:
         ingress_type = "external"
-        target_port = int(service.ports[0].target)
+
+        if len(service.ports) == 1:
+            target_port = service.ports[0].target
+        else:
+            ports_list = []
+
+            for p in service.ports:
+                ports_list.append(p.target)
+            target_port = resolve_port_or_expose_list(ports_list, "port")
+
     # Internal Ingress Check
     elif service.expose is not None:
         ingress_type = "internal"
-        target_port = service.expose[0]
+
+        if len(service.expose) == 1:
+            target_port = service.expose[0]
+        else:
+            target_port = resolve_port_or_expose_list(service.expose, "expose")
     else:
         ingress_type = None
         target_port = None
