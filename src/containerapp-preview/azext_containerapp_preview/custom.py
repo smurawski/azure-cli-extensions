@@ -8,7 +8,7 @@ import yaml
 
 from knack.log import get_logger
 from knack.util import CLIError
-from .vendored_sdks.pycomposefile import ComposeFile
+from pycomposefile import ComposeFile
 from .vendored_sdks.azext_containerapp.custom import (
     create_containerapp, create_managed_environment)
 
