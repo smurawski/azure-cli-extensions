@@ -12,7 +12,7 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp compose') as c:
         c.argument('tags', tags_type)
-        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('managed_env', options_list=['--environment', '-e'], help="Name of the containerapp's environment.")
 
     with self.argument_context('containerapp compose create') as c:
