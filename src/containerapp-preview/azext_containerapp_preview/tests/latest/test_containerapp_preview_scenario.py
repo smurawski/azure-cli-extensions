@@ -536,7 +536,7 @@ services:
             'compose': compose_file_name,
             'registry_server': "foobar.azurecr.io",
             'registry_user': "foobar",
-            'registry_pass': "snafu"
+            'registry_pass': "snafu",
         })
 
         command_string = 'containerapp compose create'
@@ -544,13 +544,14 @@ services:
         command_string += ' --resource-group {rg}'
         command_string += ' --environment {environment}'
         command_string += ' --logs-workspace {workspace}'
-        command_string += ' --registry_server {registry_server}'
-        command_string += ' --registry_user {registry_user}'
-        command_string += ' --registry_pass {registry_pass}'
+        command_string += ' --registry-server {registry_server}'
+        command_string += ' --registry-username {registry_user}'
+        command_string += ' --registry-password {registry_pass}'
+
         self.cmd(command_string, checks=[
-            self.check('[?name==`foo`].properties.configuration.registries.server', ["foobar.azurecr.io"]),
-            self.check('[?name==`foo`].properties.configuration.registries.username', ["foobar.azurecr.io"]),
-            self.check('[?name==`foo`].properties.configuration.registries.passwordSecretRef', ["snafu"]),
+            self.check('[?name==`foo`].properties.configuration.registries[0].server', ["foobar.azurecr.io"]),
+            self.check('[?name==`foo`].properties.configuration.registries[0].username', ["foobar"]),
+            self.check('[?name==`foo`].properties.configuration.registries[0].passwordSecretRef', ["foobarazurecrio-foobar"]),  # pylint: disable=C0301
         ])
 
         if os.path.exists(compose_file_name):
