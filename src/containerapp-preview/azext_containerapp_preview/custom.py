@@ -24,6 +24,9 @@ def create_containerapps_from_compose(cmd,
                                       resource_group_name,
                                       managed_env,
                                       compose_file_path='./docker-compose.yml',
+                                      registry_server=None,
+                                      registry_user=None,
+                                      registry_pass=None,
                                       transport=None,
                                       logs_workspace_name=None,
                                       location=None,
@@ -53,6 +56,7 @@ def create_containerapps_from_compose(cmd,
         logger.info(  # pylint: disable=W1203
             f"Creating the Container Apps instance for {service_name} under {resource_group_name} in {location}.")
         ingress_type, target_port = resolve_ingress_and_target_port(service)
+        registry, registry_username, registry_password = resolve_registry_from_cli_args(registry_server, registry_user, registry_pass)  # pylint: disable=C0301
         transport_setting = resolve_transport_from_cli_args(service_name, transport)
         startup_command, startup_args = resolve_service_startup_command(service)
         cpu, memory = validate_memory_and_cpu_setting(
@@ -70,6 +74,9 @@ def create_containerapps_from_compose(cmd,
                                 managed_env=managed_environment["id"],
                                 ingress=ingress_type,
                                 target_port=target_port,
+                                registry_server=registry,
+                                registry_user=registry_username,
+                                registry_pass=registry_password,
                                 transport=transport_setting,
                                 startup_command=startup_command,
                                 args=startup_args,
@@ -104,6 +111,17 @@ def resolve_transport_from_cli_args(service_name, transport):
             if key.lower() == service_name.lower():
                 return value
     return 'auto'
+
+
+def resolve_registry_from_cli_args(registry_server, registry_user, registry_pass):
+    if registry_server is not None:
+        if registry_user is None:
+            registry_user = prompt("Please enter the registry's username: ")
+            return registry_user
+        if registry_pass is None:
+            registry_pass = prompt("Please enter the registry's password: ")
+            return registry_pass
+    return (registry_server, registry_user, registry_pass)
 
 
 def resolve_environment_from_service(service):

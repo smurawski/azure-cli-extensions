@@ -514,3 +514,44 @@ services:
 
         if os.path.exists(compose_file_name):
             os.remove(compose_file_name)
+
+
+class ContainerappComposePreviewRegistryScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_containerapp_preview', location='eastus')
+    def test_containerapp_compose_create_with_registry_args(self, resource_group):
+        compose_text = """
+services:
+  foo:
+    image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
+    ports: 8080:80
+"""
+        compose_file_name = f"{self._testMethodName}_compose.yml"
+        docker_compose_file = open(compose_file_name, "w", encoding='utf-8')
+        _ = docker_compose_file.write(compose_text)
+        docker_compose_file.close()
+
+        self.kwargs.update({
+            'environment': self.create_random_name(prefix='containerapp-preview', length=24),
+            'workspace': self.create_random_name(prefix='containerapp-preview', length=24),
+            'compose': compose_file_name,
+            'registry_server': "foobar.azurecr.io",
+            'registry_user': "foobar",
+            'registry_pass': "snafu"
+        })
+
+        command_string = 'containerapp compose create'
+        command_string += ' --compose-file-path {compose}'
+        command_string += ' --resource-group {rg}'
+        command_string += ' --environment {environment}'
+        command_string += ' --logs-workspace {workspace}'
+        command_string += ' --registry_server {registry_server}'
+        command_string += ' --registry_user {registry_user}'
+        command_string += ' --registry_pass {registry_pass}'
+        self.cmd(command_string, checks=[
+            self.check('[?name==`foo`].properties.configuration.registries.server', ["foobar.azurecr.io"]),
+            self.check('[?name==`foo`].properties.configuration.registries.username', ["foobar.azurecr.io"]),
+            self.check('[?name==`foo`].properties.configuration.registries.passwordSecretRef', ["snafu"]),
+        ])
+
+        if os.path.exists(compose_file_name):
+            os.remove(compose_file_name)
