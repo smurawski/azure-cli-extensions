@@ -20,7 +20,7 @@ from .vendored_sdks.azext_containerapp._clients import ManagedEnvironmentClient
 logger = get_logger(__name__)
 
 
-def create_containerapps_from_compose(cmd,
+def create_containerapps_from_compose(cmd, # pylint: disable=R0914
                                       resource_group_name,
                                       managed_env,
                                       compose_file_path='./docker-compose.yml',
@@ -30,7 +30,7 @@ def create_containerapps_from_compose(cmd,
                                       transport=None,
                                       logs_workspace_name=None,
                                       location=None,
-                                      tags=None):  # pylint: disable=R0914
+                                      tags=None):  
     logger.info(   # pylint: disable=W1203
         f"Creating the Container Apps managed environment {managed_env} under {resource_group_name} in {location}.")
 
