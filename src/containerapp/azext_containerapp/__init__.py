@@ -6,7 +6,7 @@
 
 from azure.cli.core import AzCommandsLoader
 
-from azext_containerapp._help import helps  # pylint: disable=unused-import
+from ._help import helps  # pylint: disable=unused-import
 
 
 class ContainerappCommandsLoader(AzCommandsLoader):
@@ -20,12 +20,12 @@ class ContainerappCommandsLoader(AzCommandsLoader):
                                                          custom_command_type=containerapp_custom)
 
     def load_command_table(self, args):
-        from azext_containerapp.commands import load_command_table
+        from .commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        from azext_containerapp._params import load_arguments
+        from ._params import load_arguments
         load_arguments(self, command)
 
 

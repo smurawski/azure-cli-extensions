@@ -350,8 +350,8 @@ class ContainerappScenarioTest(ScenarioTest):
 
         cmd = mock.MagicMock()
         cmd.cli_ctx = get_dummy_cli()
-        from azext_containerapp._validators import validate_ssh
-        from azext_containerapp.custom import containerapp_ssh
+        from ._validators import validate_ssh
+        from .custom import containerapp_ssh
 
         class Namespace: pass
         namespace = Namespace()
