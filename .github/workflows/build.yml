@@ -43,18 +43,15 @@ jobs:
         run: |
           source env/bin/activate
           pip install -U pip
-          pip install -U pip
           pip install -U pylint
           pip install -U flake8
           pip install -U autopep8
           pip install -U azdev
-          pip install -U pycomposefile
 
       - name: Setup Azure CLI Dev Tooling
         run: |
           source env/bin/activate
           azdev setup --repo '.'
-          azdev extension add containerapp
           azdev extension add containerapp-preview
 
       - name: Style
@@ -72,7 +69,7 @@ jobs:
         if: success() || failure()
         run: |
           source env/bin/activate
-          azdev test containerapp-preview --series
+          azdev test containerapp-preview
 
       - name: Run package creation
         run: |

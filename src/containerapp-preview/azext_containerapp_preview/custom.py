@@ -34,7 +34,7 @@ def create_containerapps_from_compose(cmd,
         managed_environment = ManagedEnvironmentClient.show(cmd=cmd,
                                                             resource_group_name=resource_group_name,
                                                             name=managed_env)
-    except:
+    except:  # pylint: disable=W0702
         managed_environment = create_managed_environment(cmd,
                                                          managed_env,
                                                          resource_group_name,
