@@ -10,9 +10,10 @@ on:
       - .github/workflows/**
   pull_request:
     branches:
-      - containerapp-preview
+      - containerapp-preview-build
     paths:
       - src/containerapp-preview/**
+      - .github/workflows/**
 
 jobs:
   test_and_build:
@@ -39,5 +40,5 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/containerapp-preview-build' }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo "hi"
+      - run: echo "low"
       
