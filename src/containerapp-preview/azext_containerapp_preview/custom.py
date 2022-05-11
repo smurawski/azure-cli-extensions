@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import errno
+import os
 import yaml
 
 from knack.log import get_logger
@@ -44,6 +45,8 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
                                                          resource_group_name,
                                                          logs_workspace_name=logs_workspace_name,
                                                          tags=tags)
+    os.environ["AZURE_CONTAINERAPPS_ENV_DEFAULT_DOMAIN"] = managed_environment["properties"]["defaultDomain"]
+    os.environ["AZURE_CONTAINERAPPS_ENV_STATIC_IP"] = managed_environment["properties"]["staticIp"]
 
     compose_yaml = load_yaml_file(compose_file_path)
     parsed_compose_file = ComposeFile(compose_yaml)
@@ -64,7 +67,6 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
             resolve_memory_configuration_from_service(service)
         )
         environment = resolve_environment_from_service(service)
-
         containerapps_from_compose.append(
             create_containerapp(cmd,
                                 service_name,
