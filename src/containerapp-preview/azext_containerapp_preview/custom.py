@@ -45,6 +45,7 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
                                                          resource_group_name,
                                                          logs_workspace_name=logs_workspace_name,
                                                          tags=tags)
+
     os.environ["AZURE_CONTAINERAPPS_ENV_DEFAULT_DOMAIN"] = managed_environment["properties"]["defaultDomain"]
     os.environ["AZURE_CONTAINERAPPS_ENV_STATIC_IP"] = managed_environment["properties"]["staticIp"]
 
@@ -67,6 +68,12 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
             resolve_memory_configuration_from_service(service)
         )
         environment = resolve_environment_from_service(service)
+        secret_vars, secret_env_ref = resolve_secret_from_service(service, parsed_compose_file.secrets)
+        if environment is not None and secret_env_ref is not None:
+            environment.extend(secret_env_ref)
+        elif secret_env_ref is not None:
+            environment = secret_env_ref
+
         containerapps_from_compose.append(
             create_containerapp(cmd,
                                 service_name,
@@ -85,6 +92,7 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
                                 cpu=cpu,
                                 memory=memory,
                                 env_vars=environment,
+                                secrets=secret_vars,
                                 ))
 
     return containerapps_from_compose
@@ -139,6 +147,33 @@ def resolve_environment_from_service(service):
         env_array.append(f"{k}={v}")
 
     return env_array
+
+
+def resolve_secret_from_service(service, secrets_map):
+    secret_array = []
+    secret_env_ref = []
+
+    if service.secrets is None:
+        return (None, None)
+
+    for secret in service.secrets:
+
+        secret_config = secrets_map[secret.source]
+        if secret_config is not None and secret_config.file is not None:
+            value = secret_config.file.readFile()
+            if secret.target is None:
+                secret_name = secret.source.replace('_', '-')
+            else:
+                secret_name = secret.target.replace('_', '-')
+            secret_array.append(f"{secret_name}={value}")
+            secret_env_ref.append(f"{secret_name}=secretref:{secret_name}")
+
+    if len(secret_array) == 0:
+        return (None, None)
+
+    logger.warning("Note: Secrets will be mapped as secure environment variables in Azure Container Apps.")
+
+    return (secret_array, secret_env_ref)
 
 
 def valid_resource_settings():
